@@ -321,7 +321,7 @@ class SileroVADModel:
         ), "Input should be a 2D array with size (batch_size, num_samples)"
 
         batch_size, num_samples = audio.shape
-        rhs_padding = (window_size_samples - num_samples) % window_size_samples
+        rhs_padding = window_size_samples - num_samples % window_size_samples
         audio = np.pad(audio, ((0, 0), (context_size_samples, rhs_padding)))
 
         encoder_batch_size = 2000
@@ -332,12 +332,14 @@ class SileroVADModel:
 
         outputs = []
         for i in range(0, num_samples, batch_samples):
-            batch = audio[:, i: i + batch_samples + context_size_samples]
-            batch = np.lib.stride_tricks.as_strided(
-                batch,
-                (batch_size, batch.shape[1] // window_size_samples, input_size),
-                (batch.strides[0], batch.strides[1] * window_size_samples, batch.strides[1]),
+            batch = audio[:, i : i + batch_samples + context_size_samples]
+            shape = (batch_size, batch.shape[1] // window_size_samples, input_size)
+            strides = (
+                batch.strides[0],
+                batch.strides[1] * window_size_samples,
+                batch.strides[1],
             )
+            batch = np.lib.stride_tricks.as_strided(batch, shape, strides)
             output, h, c = self.session.run(None, {"input": batch, "h": h, "c": c})
             outputs.append(output)
 
