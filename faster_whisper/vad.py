@@ -334,7 +334,7 @@ class SileroVADModel:
 
         outputs = []
         for i in range(0, num_samples, batch_samples):
-            batch = audio[:, i:i+batch_samples+context_size_samples]
+            batch = audio[:, i: i + batch_samples+context_size_samples]
             batch = np.lib.stride_tricks.as_strided(
                 batch,
                 (batch_size, batch.shape[1] // window_size_samples, input_size),
