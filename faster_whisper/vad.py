@@ -319,7 +319,6 @@ class SileroVADModel:
         assert (
             audio.ndim == 2
         ), "Input should be a 2D array with size (batch_size, num_samples)"
-        assert audio.shape[1] >= 512, "Input audio chunk is too short"
 
         batch_size, num_samples = audio.shape
         rhs_padding = (window_size_samples - num_samples) % window_size_samples
@@ -333,7 +332,7 @@ class SileroVADModel:
 
         outputs = []
         for i in range(0, num_samples, batch_samples):
-            batch = audio[:, i: i + batch_samples+context_size_samples]
+            batch = audio[:, i: i + batch_samples + context_size_samples]
             batch = np.lib.stride_tricks.as_strided(
                 batch,
                 (batch_size, batch.shape[1] // window_size_samples, input_size),
