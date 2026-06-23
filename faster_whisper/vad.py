@@ -1,13 +1,18 @@
 import bisect
 import functools
 import os
-
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
-from faster_whisper.utils import get_assets_path
+
+# Lazy import to avoid importing faster_whisper.utils at module import time
+# which can require optional dependencies (e.g. requests).
+def get_assets_path(*args, **kwargs):
+    from faster_whisper.utils import get_assets_path as _get_assets_path
+
+    return _get_assets_path(*args, **kwargs)
 
 
 # The code below is adapted from https://github.com/snakers4/silero-vad.
@@ -320,7 +325,8 @@ class SileroVADModel:
             audio.ndim == 2
         ), "Input should be a 2D array with size (batch_size, num_samples)"
 
-        rhs_padding = window_size_samples - num_samples % window_size_samples
+        batch_size, num_samples = audio.shape
+        rhs_padding = window_size_samples - (num_samples % window_size_samples)
         audio = np.pad(audio, ((0, 0), (context_size_samples, rhs_padding)))
         batch_size, num_samples = audio.shape
 

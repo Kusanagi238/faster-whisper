@@ -1,11 +1,14 @@
 import logging
 import os
 import re
-
 from typing import List, Optional, Union
 
 import huggingface_hub
-import requests
+
+try:
+    import requests
+except Exception:  # Optional dependency - delay failure until use
+    requests = None
 
 from tqdm.auto import tqdm
 

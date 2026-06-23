@@ -1,6 +1,13 @@
 import os
 
-from faster_whisper import available_models, download_model
+import pytest
+
+try:
+    from faster_whisper import available_models, download_model
+except Exception:
+    pytest.skip(
+        "faster_whisper or its dependencies not available", allow_module_level=True
+    )
 
 
 def test_available_models():

@@ -1,6 +1,13 @@
-from faster_whisper import WhisperModel
-from faster_whisper.tokenizer import Tokenizer
-from faster_whisper.transcribe import get_suppressed_tokens
+try:
+    from faster_whisper import WhisperModel
+    from faster_whisper.tokenizer import Tokenizer
+    from faster_whisper.transcribe import get_suppressed_tokens
+except ModuleNotFoundError as e:
+    import pytest
+
+    pytest.skip(
+        f"Skipping tests because dependency missing: {e.name}", allow_module_level=True
+    )
 
 
 def test_suppressed_tokens_minus_1():

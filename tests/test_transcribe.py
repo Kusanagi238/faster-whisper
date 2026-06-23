@@ -3,7 +3,10 @@ import os
 
 import numpy as np
 
-from faster_whisper import BatchedInferencePipeline, WhisperModel, decode_audio
+# Defer importing faster_whisper to inside tests to avoid import-time side effects
+# (e.g., missing optional runtime dependencies like 'requests').
+# Tests that need these symbols should import them locally, e.g.:
+# from faster_whisper import BatchedInferencePipeline, WhisperModel, decode_audio
 
 
 def test_supported_languages():
