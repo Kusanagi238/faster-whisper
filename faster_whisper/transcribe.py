@@ -1,10 +1,14 @@
 import asyncio
+
+# Lazily import utilities from faster_whisper.utils to avoid importing optional
+# dependencies (such as 'requests') at module import time which may break test
+# collection. Each wrapper defers the actual import until the utility is used.
+import importlib
 import itertools
 import json
 import logging
 import os
 import zlib
-
 from dataclasses import asdict, dataclass
 from inspect import signature
 from math import ceil
@@ -14,7 +18,6 @@ from warnings import warn
 import ctranslate2
 import numpy as np
 import tokenizers
-
 from ctranslate2._ext import WhisperGenerationResultAsync
 from tqdm import tqdm
 from tqdm.asyncio import tqdm as atqdm
@@ -22,7 +25,30 @@ from tqdm.asyncio import tqdm as atqdm
 from faster_whisper.audio import decode_audio, pad_or_trim
 from faster_whisper.feature_extractor import FeatureExtractor
 from faster_whisper.tokenizer import _LANGUAGE_CODES, Tokenizer
-from faster_whisper.utils import download_model, format_timestamp, get_end, get_logger
+
+
+def _get_utils():
+    # Import on demand; if the module or its dependencies are missing, the
+    # ImportError will be raised only when a util function is actually invoked.
+    return importlib.import_module("faster_whisper.utils")
+
+
+def download_model(*args, **kwargs):
+    return _get_utils().download_model(*args, **kwargs)
+
+
+def format_timestamp(*args, **kwargs):
+    return _get_utils().format_timestamp(*args, **kwargs)
+
+
+def get_end(*args, **kwargs):
+    return _get_utils().get_end(*args, **kwargs)
+
+
+def get_logger(*args, **kwargs):
+    return _get_utils().get_logger(*args, **kwargs)
+
+
 from faster_whisper.vad import (
     SpeechTimestampsMap,
     VadOptions,
@@ -1122,6 +1148,7 @@ class AsyncBatchedInferencePipeline:
         finally:
             pbar.close()
             self.last_speech_timestamp = 0.0
+
 
 class WhisperModel:
     def __init__(

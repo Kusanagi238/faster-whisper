@@ -1,6 +1,20 @@
 import os
 
-from faster_whisper import available_models, download_model
+# Delay importing faster_whisper until the functions are actually called
+# to avoid import-time failures during test collection if optional
+# runtime dependencies are missing.
+
+
+def available_models(*args, **kwargs):
+    from faster_whisper import available_models as _available_models
+
+    return _available_models(*args, **kwargs)
+
+
+def download_model(*args, **kwargs):
+    from faster_whisper import download_model as _download_model
+
+    return _download_model(*args, **kwargs)
 
 
 def test_available_models():

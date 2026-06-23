@@ -1,6 +1,33 @@
-from faster_whisper import WhisperModel
-from faster_whisper.tokenizer import Tokenizer
-from faster_whisper.transcribe import get_suppressed_tokens
+import importlib
+
+
+class _LazyProxy:
+    def __init__(self, module_name, attr_name):
+        self.module_name = module_name
+        self.attr_name = attr_name
+        self._obj = None
+
+    def _load(self):
+        if self._obj is None:
+            module = importlib.import_module(self.module_name)
+            self._obj = getattr(module, self.attr_name)
+        return self._obj
+
+    def __call__(self, *args, **kwargs):
+        return self._load()(*args, **kwargs)
+
+    def __getattr__(self, name):
+        return getattr(self._load(), name)
+
+    def __repr__(self):
+        return repr(self._load())
+
+
+# Lazy proxies avoid importing the faster_whisper package at test collection time,
+# preventing runtime dependency imports (e.g. requests) until the tests actually run.
+WhisperModel = _LazyProxy("faster_whisper", "WhisperModel")
+Tokenizer = _LazyProxy("faster_whisper.tokenizer", "Tokenizer")
+get_suppressed_tokens = _LazyProxy("faster_whisper.transcribe", "get_suppressed_tokens")
 
 
 def test_suppressed_tokens_minus_1():
